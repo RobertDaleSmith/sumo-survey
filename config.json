@@ -1,0 +1,15 @@
+{
+  "env": "dev",
+  "port": 5000,
+  "mysql": {
+    "host": "192.168.1.180",
+    "schema": "sumosurvey",
+    "username": "sumo",
+    "password": "tacos",
+    "options":{	"force": false }
+  },
+  "admin": {
+  	"username": "sumo",
+  	"password": "tacos"
+  }
+}

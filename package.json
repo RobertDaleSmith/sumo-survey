@@ -1,0 +1,23 @@
+{
+  "name": "sumo-survey",
+  "version": "1.0.0",
+  "description": "Sumome's javascript challenge.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "RobertDaleSmith",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^1.4.2",
+    "body-parser": "^1.13.3",
+    "consolidate": "^0.13.1",
+    "dustjs-helpers": "^1.7.3",
+    "dustjs-linkedin": "^2.7.2",
+    "express": "^4.13.3",
+    "multer": "^1.0.3",
+    "mysql": "^2.8.0",
+    "node-uuid": "^1.4.3",
+    "sequelize": "^3.5.1"
+  }
+}
