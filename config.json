@@ -6,7 +6,7 @@
     "schema": "sumosurvey",
     "username": "sumo",
     "password": "tacos",
-    "options":{	"force": false }
+    "options": { "force": false }
   },
   "admin": {
   	"username": "sumo",

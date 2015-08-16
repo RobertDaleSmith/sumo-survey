@@ -6,6 +6,11 @@ var models = module.exports = {};
 var sequelize = new Sequelize(config.mysql.schema, config.mysql.username, config.mysql.password, {
 	host: config.mysql.host,
 	dialect: 'mysql',
+	logging: function(event){
+		if(event.indexOf("sessions") < 0){
+			console.log(event);
+		}
+	},
 	pool: {
 		max: 40,
 		min: 0,
@@ -13,8 +18,13 @@ var sequelize = new Sequelize(config.mysql.schema, config.mysql.username, config
 	}
 });
 
+var syncTables = function(ready){
+	models.sequelize.sync(config.mysql.options).then(ready);
+}
+
 // define models
 models.sequelize = sequelize;
+models.sync = syncTables;
 models.Admin = sequelize.import('./Admin.js');
 models.Answer = sequelize.import('./Answer.js');
 models.Question = sequelize.import('./Question.js');

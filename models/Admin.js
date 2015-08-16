@@ -2,12 +2,6 @@
 
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('admin', { 
-    id: {
-      field: 'id',
-      primaryKey: true,
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
     username: {
       field: 'username',
       type: DataTypes.STRING, 
