@@ -79,7 +79,9 @@ Vote = db.define('vote', {
 	id: {
       type: Sequelize.UUID,
       primaryKey: true
-    }
+    },
+    q_id: Sequelize.UUID,
+    a_id: Sequelize.UUID
 },{	freezeTableName: true, underscored: true });
 
 Answer = db.define('answer', {
@@ -178,13 +180,20 @@ async.parallel(
 						where: { questionId: Sequelize.col('question.id') },
 						attributes: ['id', 'text', 'order']
 					}],
-					limit: 1,
-					order: ['created_at', 'answers.order']
+					limit: 10,
+					order: ['answers.order']
 				}).then(function(questions) {
 
 					var result = {};
 
-					if(questions.length > 0) result=questions[0].dataValues;
+					if(questions.length > 0) {
+						
+						var max = questions.length-1;
+						var idx = Math.round(Math.random()*max);
+
+						result=questions[idx].dataValues;
+
+					}
 					
 					res.send(result);
 
@@ -197,7 +206,7 @@ async.parallel(
 
 				var _id = uuid.v4();
 				var a_id = req.query._id || null;
-				var q_id = req.query.q_id || null;
+				var q_id = req.query.q_id || "";
 				var u_id = req.session.token || null;
 
 				if(a_id && u_id) {
@@ -206,12 +215,11 @@ async.parallel(
 					[
 						function(next){ 
 
-							console.log(_id);
-							console.log(u_id);
-
 							Vote.create({
 								id: _id,
 								user_id: u_id,
+								a_id: a_id,
+								q_id: q_id
 							}).then(function(vote){
 								
 								next();
@@ -224,9 +232,10 @@ async.parallel(
 							Answer.update({
 								count: Sequelize.literal('count + 1')
 							},{
-								where: {id: a_id}
+								where: {id: a_id},
+								attributes: ['question_id']
 							}).then(function(answer){
-
+								console.log(answer);
 								next();
 
 							});
