@@ -10,6 +10,7 @@
 
 // get dependencies
 var async = require('async');
+var bcrypt = require('bcrypt-nodejs'); 
 var bodyParser = require('body-parser');
 var cons = require('consolidate');
 var dust = require('dustjs-linkedin');
@@ -119,8 +120,17 @@ async.parallel(
 		console.log("\n--- DB READY ---\n");
 
 		// init an admin
-		// Admin.create(config.admin);
-				
+		// checks for admin in db, if none then creates new with config.
+		Admin.findOne({
+			where: {username: config.admin.username},
+			attributes: ['username', 'password']
+		}).then(function(admin) {
+			if(!admin){
+				var password = bcrypt.hashSync( config.admin.password, bcrypt.genSaltSync(10) );
+				Admin.create({username: config.admin.username, password: password});
+			}
+		});
+		
 		// middleware
 
 			//Checks for token ID and if user exists, generates new user if none and returns UUID as token.
@@ -162,10 +172,6 @@ async.parallel(
 			// Get next unanswered Question
 			app.get('/survey', checkUser, function( req, res, next ) {
 
-				console.log('\n');
-				console.log(req.session.token);
-				console.log('\n');
-
 				var u_id = req.session.token;
 				var answered = [];
 
@@ -179,13 +185,10 @@ async.parallel(
 						}).then(function(votes) {
 							
 							var results = [];
-
 							votes.forEach(function(vote){
 								if(vote.dataValues) results.push(vote.dataValues.q_id);
 							});
-
 							answered = results;
-
 							next();
 						});
 						
@@ -207,16 +210,11 @@ async.parallel(
 						}).then(function(questions) {
 
 							var result = {};
-
 							if(questions.length > 0) {
-								
 								var max = questions.length-1;
 								var idx = Math.round(Math.random()*max);
-
 								result=questions[idx].dataValues;
-
 							}
-							
 							res.send(result);
 
 						});
@@ -229,7 +227,7 @@ async.parallel(
 				});
 				
 
-				//TODO: If all answered, then requests email.
+				//TODO: If all answered, then request email.
 
 			});
 
@@ -314,12 +312,6 @@ async.parallel(
 
 			});
 
-			//TODO: Submit vote route
-			//	increments count on answer
-			//  adds new vote
-			//  returns next unanwered question
-
-
 			//TODO: Submit name/email route
 
 		// admin routes
@@ -333,36 +325,36 @@ async.parallel(
 			});
 
 			// Admin token request
-			app.post( '/admin/signin', function( req, res, next ) {
+			app.post( '/admin', function( req, res, next ) {
 
 				var username = req.body.username || "";
 				var password = req.body.password || "";
+
+
 
 				Admin.findOne({
 					where: {username: username},
 					attributes: ['username', 'password']
 				}).then(function(admin) {
 
-					if(admin) admin=admin.dataValues;
+					if(admin)admin=admin.dataValues;
 
-					if(admin && admin.password==password){
+					if(admin){
 
-						//TODO: Add new user to DB.
-
-						//TODO: Generate JWT containing user's id.
-
-						res.send({'status':'success'});
-
+						if(bcrypt.compareSync(password, admin.password)){
+							res.send({'status':'success'});
+						} else {
+							res.send({'error':false}); // Password invalid.
+						}
+							
 					} else {
-						res.send({'error':true});
+						res.send({'error':true}); // User not found.
 					}
+					
 
 				});
 
 			});
-
-
-			
 
 
 			// Get all Questions with Answers
@@ -460,8 +452,6 @@ async.parallel(
 			});
 
 
-
-
 			// Get an Answer
 			app.get('/answer', checkAdmin, function( req, res, next ) {
 
@@ -528,7 +518,6 @@ async.parallel(
 				}
 
 			});
-
 
 
 			// 404 to root
