@@ -73,14 +73,14 @@ User = db.define('user', {
       primaryKey: true
     },
 	email: { type: Sequelize.STRING, allowNull: true }
-},{	freezeTableName: true });
+},{	freezeTableName: true, underscored: true });
 
 Vote = db.define('vote', {
 	id: {
       type: Sequelize.UUID,
       primaryKey: true
     }
-},{	freezeTableName: true });
+},{	freezeTableName: true, underscored: true });
 
 Answer = db.define('answer', {
 	id: {
@@ -105,15 +105,13 @@ Question = db.define('question', {
 Question.hasMany(Answer, { onDelete: 'cascade', hooks: true });
 Answer.belongsTo(Question, { onDelete: 'cascade', hooks: true });
 
+User.hasMany(Vote, { onDelete: 'cascade', hooks: true });
+Vote.belongsTo(User, { onDelete: 'cascade', hooks: true });
 
 // sync tables
 async.parallel(
 	[
-		function(next){ Session.sync(config.mysql.options).then(next);	},
-		function(next){ Admin.sync(config.mysql.options).then(next);	},
-		function(next){ User.sync(config.mysql.options).then(next);		},
-		function(next){ Answer.sync(config.mysql.options).then(next);	},		
-		function(next){ Question.sync(config.mysql.options).then(next);	}
+		function(next){ db.sync(config.mysql.options).then(next);	}
 	], 
 	function(){
 		console.log("\n--- DB READY ---\n");
@@ -153,6 +151,7 @@ async.parallel(
 			function checkAdmin(req, res, next) {
 
 				console.log('\nCHECKING FOR Admin TOKEN...\n');
+
 				next();
 
 			}
@@ -197,13 +196,48 @@ async.parallel(
 			app.post('/survey', checkUser, function( req, res, next ) {
 
 				var _id = uuid.v4();
-				var a_id = req.query.a_id || null;
+				var a_id = req.query._id || null;
 				var q_id = req.query.q_id || null;
-				var u_id = req.query.u_id || null;
+				var u_id = req.session.token || null;
 
-				if(a_id && q_id && u_id) {
+				if(a_id && u_id) {
 
+					async.parallel(
+					[
+						function(next){ 
 
+							console.log(_id);
+							console.log(u_id);
+
+							Vote.create({
+								id: _id,
+								user_id: u_id,
+							}).then(function(vote){
+								
+								next();
+
+							});
+							
+						},
+						function(next){ 
+
+							Answer.update({
+								count: Sequelize.literal('count + 1')
+							},{
+								where: {id: a_id}
+							}).then(function(answer){
+
+								next();
+
+							});
+
+						}
+					], 
+					function(){
+
+						res.send({'status':'voted'});
+
+					});
 
 				}else{
 					res.send({'error':true});
