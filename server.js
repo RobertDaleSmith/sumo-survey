@@ -194,7 +194,7 @@ async.parallel(
 
 						// Gets random question unanswered by user.
 						Question.findAll({
-							// where: { id: { ne: answered } },
+							where: { id: { not: answered } },
 							attributes: ['id', 'text'],
 							include: [{
 								model: Answer,
