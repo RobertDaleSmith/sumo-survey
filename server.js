@@ -113,15 +113,14 @@ Vote.belongsTo(User, { onDelete: 'cascade', hooks: true });
 // sync tables
 async.parallel(
 	[
-		function(next){ db.sync(config.mysql.options).then(next);	}
+		function(next){ db.sync(config.mysql.options).then(next); }
 	], 
 	function(){
 		console.log("\n--- DB READY ---\n");
 
 		// init an admin
 		// Admin.create(config.admin);
-
-
+				
 		// middleware
 
 			//Checks for token ID and if user exists, generates new user if none and returns UUID as token.
@@ -166,38 +165,69 @@ async.parallel(
 				console.log('\n');
 				console.log(req.session.token);
 				console.log('\n');
-				
-				
-				//TODO: Gets random question unanswered by user.
-				
-				//TODO: If all answered, then requests email.
 
-				Question.findAll({
-					attributes: ['id', 'text'],
-					include: [{
-						model: Answer,
-						required: false,
-						where: { questionId: Sequelize.col('question.id') },
-						attributes: ['id', 'text', 'order']
-					}],
-					limit: 10,
-					order: ['answers.order']
-				}).then(function(questions) {
+				var u_id = req.session.token;
+				var answered = [];
 
-					var result = {};
+				async.series([	
+					function(next){ 
 
-					if(questions.length > 0) {
+						Vote.findAll({
+							where: {user_id: u_id},
+							attributes: ['q_id']
+						}).then(function(votes) {
+							
+							var results = [];
+
+							votes.forEach(function(vote){
+								if(vote.dataValues) results.push(vote.dataValues.q_id);
+							});
+
+							answered = results;
+
+							next();
+						});
 						
-						var max = questions.length-1;
-						var idx = Math.round(Math.random()*max);
+					},
+					function(next){ 
 
-						result=questions[idx].dataValues;
+						// Gets random question unanswered by user.
+						Question.findAll({
+							attributes: ['id', 'text'],
+							include: [{
+								model: Answer,
+								required: false,
+								where: { questionId: Sequelize.col('question.id') },
+								attributes: ['id', 'text', 'order']
+							}],
+							limit: 10,
+							order: ['answers.order']
+						}).then(function(questions) {
+
+							var result = {};
+
+							if(questions.length > 0) {
+								
+								var max = questions.length-1;
+								var idx = Math.round(Math.random()*max);
+
+								result=questions[idx].dataValues;
+
+							}
+							
+							res.send(result);
+
+						});
 
 					}
-					
-					res.send(result);
+				],function(){
+
+					res.send({'status':'voted'});
 
 				});
+				
+
+				//TODO: If all answered, then requests email.
 
 			});
 
@@ -211,8 +241,18 @@ async.parallel(
 
 				if(a_id && u_id) {
 
-					async.parallel(
-					[
+					async.series([	
+						function(next){ 
+
+							Answer.findOne({
+								where: {id: a_id},
+								attributes: ['question_id']
+							}).then(function(answer) {
+								q_id = answer.question_id;
+								next();
+							});
+							
+						},
 						function(next){ 
 
 							Vote.create({
@@ -221,9 +261,7 @@ async.parallel(
 								a_id: a_id,
 								q_id: q_id
 							}).then(function(vote){
-								
 								next();
-
 							});
 							
 						},
@@ -234,15 +272,12 @@ async.parallel(
 							},{
 								where: {id: a_id},
 								attributes: ['question_id']
-							}).then(function(answer){
-								console.log(answer);
+							}).then(function(){
 								next();
-
 							});
 
 						}
-					], 
-					function(){
+					],function(){
 
 						res.send({'status':'voted'});
 
@@ -261,7 +296,6 @@ async.parallel(
 
 
 			//TODO: Submit name/email route
-
 
 		// admin routes
 			
@@ -478,6 +512,6 @@ async.parallel(
 			// initializing a port
 			app.listen(port);
 
-		}
+	}
 
 );
