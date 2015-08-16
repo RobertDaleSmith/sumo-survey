@@ -243,7 +243,7 @@ async.parallel(
 
 				if(a_id && u_id) {
 
-					async.series([	
+					async.series([
 						function(next){ 
 
 							Answer.findOne({
@@ -252,6 +252,24 @@ async.parallel(
 							}).then(function(answer) {
 								q_id = answer.question_id;
 								next();
+							});
+							
+						},
+						function(next){ 
+
+							Vote.findOne({
+								where: {q_id: q_id, user_id: u_id },
+								attributes: ['id']
+							}).then(function(vote) {
+
+								if(vote) vote=vote.dataValues;
+
+								if(vote){
+									next('already voted');
+								}else{
+									next();	
+								}
+								
 							});
 							
 						},
@@ -279,9 +297,10 @@ async.parallel(
 							});
 
 						}
-					],function(){
+					],function(err){
 
-						res.send({'status':'voted'});
+						var status = err || 'voted';
+						res.send({'status':status});
 
 					});
 
