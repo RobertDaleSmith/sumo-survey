@@ -170,6 +170,7 @@ async.parallel(
 				var answered = [];
 
 				async.series([	
+					// Gets user's answered question ids.
 					function(next){ 
 
 						Vote.findAll({
@@ -193,6 +194,7 @@ async.parallel(
 
 						// Gets random question unanswered by user.
 						Question.findAll({
+							// where: { id: { ne: answered } },
 							attributes: ['id', 'text'],
 							include: [{
 								model: Answer,
