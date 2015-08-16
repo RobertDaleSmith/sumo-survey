@@ -161,9 +161,12 @@ async.parallel(
 			}
 			function checkAdmin(req, res, next) {
 
-				console.log('\nCHECKING FOR Admin TOKEN...\n');
-
-				next();
+				if( req.session.admin && req.session.loggedIn ){
+					next();
+				}else{
+					res.status(403);
+					res.send({success:false, error:'Not logged in'});
+				}
 
 			}
 
@@ -321,16 +324,35 @@ async.parallel(
 
 			// Admin interface
 			app.get( '/admin', function( req, res, next ) {
-				res.send({'status':'admin'});
+
+				if(req.session.loggedIn){
+					res.send({'status':'loggedIn'});
+				}else {
+					res.send({'status':'loggedOut'});
+				}
+				
 			});
 
-			// Admin token request
+			// Admin log-in post
 			app.post( '/admin', function( req, res, next ) {
 
-				var username = req.body.username || "";
-				var password = req.body.password || "";
+				var user = req.body['admin'];
+				var username = user.username || "";
+				var password = user.password || "";
+				var remember = user.remember || false;
 
+				function loginSuccess(result){
+					result.password = null;
+					req.session.admin = result;
+					req.session.loggedIn = true;
+					if (user.remember) { req.session.cookie.maxAge = 2628000000; }
+					else { req.session.cookie.maxAge = 24*60*60*1000; }
 
+					req.session.save(function (err) {
+						res.redirect('/admin');
+					});
+					
+				}
 
 				Admin.findOne({
 					where: {username: username},
@@ -342,7 +364,10 @@ async.parallel(
 					if(admin){
 
 						if(bcrypt.compareSync(password, admin.password)){
-							res.send({'status':'success'});
+
+							loginSuccess(admin);
+							// res.send({'status':'success'});
+
 						} else {
 							res.send({'error':false}); // Password invalid.
 						}
@@ -352,6 +377,17 @@ async.parallel(
 					}
 					
 
+				});
+
+			});
+
+			// Admin log-out
+			app.get( '/admin/logout', function( req, res, next ) {
+
+				req.session.admin = null;
+				req.session.loggedIn = false;
+				req.session.save(function (err) {
+					res.redirect('/admin');
 				});
 
 			});
