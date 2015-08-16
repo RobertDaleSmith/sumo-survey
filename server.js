@@ -28,7 +28,7 @@ var uuid = require('node-uuid');
 var app = express();
 var config = require('./config.json');
 var port = config.port || 8080;
-var db, Session, Admin, User, Vote, Question, Answer;
+var Session;
 
 app.set('port', port);
 app.use(express.static(__dirname + '/public', {redirect: false}));
@@ -38,19 +38,12 @@ app.engine('dust', cons.dust);
 app.set('views', __dirname + '/views');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
-app.use(multer({dest:'./uploads/'}).single('singleInputFileName'));
+app.use(multer().single('singleInputFileName'));
 
-
-// init database
-db = new Sequelize(config.mysql.schema, config.mysql.username, config.mysql.password, {
-	host: config.mysql.host,
-	dialect: 'mysql',
-	pool: { max: 5, min: 0, idle: 100 }
-});
-
+var models = require('./models');
 
 // init sessions
-var store = new Store(db, 'session');
+var store = new Store(models.sequelize, 'session');
 app.use(expressSession({
 	name: 'sid',
 	secret: 'MyAwesomeAppSessionSecret',
@@ -59,75 +52,26 @@ app.use(expressSession({
 	saveUninitialized: true
 }));
 
-
-// define models
 Session = store.Session;
 
-Admin = db.define('admin', {
-	username: { type: Sequelize.STRING, unique: true},
-	password: Sequelize.STRING
-},{	freezeTableName: true });
-
-User = db.define('user', {
-	id: {
-      type: Sequelize.UUID,
-      primaryKey: true
-    },
-	email: { type: Sequelize.STRING, allowNull: true }
-},{	freezeTableName: true, underscored: true });
-
-Vote = db.define('vote', {
-	id: {
-      type: Sequelize.UUID,
-      primaryKey: true
-    },
-    q_id: Sequelize.UUID,
-    a_id: Sequelize.UUID
-},{	freezeTableName: true, underscored: true });
-
-Answer = db.define('answer', {
-	id: {
-      type: Sequelize.UUID,
-      primaryKey: true
-    },
-	text: Sequelize.STRING,	
-	order: Sequelize.INTEGER,
-	count: Sequelize.INTEGER
-},{	freezeTableName: true, underscored: true });
-
-Question = db.define('question', {
-	id: {
-      type: Sequelize.UUID,
-      primaryKey: true
-    },
-	text: Sequelize.STRING,
-},{	freezeTableName: true, underscored: true });
-
-
-// model associations
-Question.hasMany(Answer, { onDelete: 'cascade'});
-Answer.belongsTo(Question, { onDelete: 'cascade'});
-
-User.hasMany(Vote, { onDelete: 'cascade', hooks: true });
-Vote.belongsTo(User, { onDelete: 'cascade', hooks: true });
 
 // sync tables
 async.parallel(
 	[
-		function(next){ db.sync(config.mysql.options).then(next); }
+		function(next){ models.sequelize.sync(config.mysql.options).then(next); }
 	], 
 	function(){
 		console.log("\n--- DB READY ---\n");
 
 		// init an admin
-		// checks for admin in db, if none then creates new with config.
-		Admin.findOne({
+		// checks for admin, if none then add.
+		models.Admin.findOne({
 			where: {username: config.admin.username},
 			attributes: ['username', 'password']
 		}).then(function(admin) {
 			if(!admin){
 				var password = bcrypt.hashSync( config.admin.password, bcrypt.genSaltSync(10) );
-				Admin.create({username: config.admin.username, password: password});
+				models.Admin.create({username: config.admin.username, password: password});
 			}
 		});
 		
@@ -145,7 +89,7 @@ async.parallel(
 					
 					req.session.token = _id;
 
-					User.create({
+					models.User.create({
 						id: _id,
 						email: null
 					}).then(function(user){
@@ -182,7 +126,7 @@ async.parallel(
 					// Gets user's answered question ids.
 					function(next){ 
 
-						Vote.findAll({
+						models.Vote.findAll({
 							where: {user_id: u_id},
 							attributes: ['q_id']
 						}).then(function(votes) {
@@ -194,7 +138,7 @@ async.parallel(
 
 							if(results.length<1) answered = null;
 							else answered = results;
-							
+
 							next();
 						});
 						
@@ -202,11 +146,11 @@ async.parallel(
 					function(next){ 
 
 						// Gets random question unanswered by user.
-						Question.findAll({
+						models.Question.findAll({
 							where: { id: { not: answered } },
 							attributes: ['id', 'text'],
 							include: [{
-								model: Answer,
+								model: models.Answer,
 								required: false,
 								where: { questionId: Sequelize.col('question.id') },
 								attributes: ['id', 'text', 'order']
@@ -232,9 +176,6 @@ async.parallel(
 
 				});
 				
-
-				//TODO: If all answered, then request email.
-
 			});
 
 			// Cast Vote for an Answer and get next unanswered Question
@@ -251,7 +192,7 @@ async.parallel(
 						function(next){ 
 
 							// Gets Answer's Question's id.
-							Answer.findOne({
+							models.Answer.findOne({
 								where: {id: a_id},
 								attributes: ['question_id']
 							}).then(function(answer) {
@@ -263,7 +204,7 @@ async.parallel(
 						function(next){ 
 
 							// Check if Question has existing vote from this User.
-							Vote.findOne({
+							models.Vote.findOne({
 								where: {q_id: q_id, user_id: u_id },
 								attributes: ['id']
 							}).then(function(vote) {
@@ -282,7 +223,7 @@ async.parallel(
 						function(next){ 
 
 							// Creates Vote associated User, for a Question's Answer 
-							Vote.create({
+							models.Vote.create({
 								id: _id,
 								user_id: u_id,
 								a_id: a_id,
@@ -295,7 +236,7 @@ async.parallel(
 						function(next){ 
 
 							// Increments Answer's vote count.
-							Answer.update({
+							models.Answer.update({
 								count: Sequelize.literal('count + 1')
 							},{
 								where: {id: a_id},
@@ -318,12 +259,7 @@ async.parallel(
 
 			});
 
-			//TODO: Submit name/email route
-
 		// admin routes
-			
-			//TODO: protect routes with JWT verified token.
-
 
 			// Admin interface
 			app.get( '/admin', function( req, res, next ) {
@@ -357,7 +293,7 @@ async.parallel(
 					
 				}
 
-				Admin.findOne({
+				models.Admin.findOne({
 					where: {username: username},
 					attributes: ['username', 'password']
 				}).then(function(admin) {
@@ -399,9 +335,9 @@ async.parallel(
 			// Get all Questions with Answers
 			app.get('/questions', checkAdmin, function( req, res, next ) {
 
-				Question.findAll({
+				models.Question.findAll({
 					include: [{
-						model: Answer,
+						model: models.Answer,
 						required: false,
 						where: { questionId: Sequelize.col('question.id') }
 					}],
@@ -429,12 +365,12 @@ async.parallel(
 
 				if(_id){
 
-					Question.findOne({
+					models.Question.findOne({
 						where: {
 							id: _id
 						},
 						include: [{
-							model: Answer,
+							model: models.Answer,
 							required: false,
 							where: { questionId: Sequelize.col('question.id') }
 						}],
@@ -458,7 +394,7 @@ async.parallel(
 
 				if(text!=""){
 
-					Question.create({
+					models.Question.create({
 						id: _id,
 						text: text
 					}).then(function(question){
@@ -478,7 +414,7 @@ async.parallel(
 
 				if(_id!=""){
 
-					Question.destroy({
+					models.Question.destroy({
 						where: { id: _id }
 					}).then(function(question){
 						res.send({'status':'deleted'});
@@ -498,7 +434,7 @@ async.parallel(
 
 				if(_id){
 
-					Answer.findOne({
+					models.Answer.findOne({
 						where: {
 							id: _id
 						}
@@ -523,7 +459,7 @@ async.parallel(
 
 				if(q_id && text!=""){
 
-					Answer.create({
+					models.Answer.create({
 						id: _id,
 						question_id: q_id,
 						text: text,
@@ -546,7 +482,7 @@ async.parallel(
 
 				if(_id!=""){
 
-					Answer.destroy({
+					models.Answer.destroy({
 						where: { id: _id }
 					}).then(function(answer){
 						res.send({'status':'deleted'});
