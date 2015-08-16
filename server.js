@@ -246,6 +246,7 @@ async.parallel(
 					async.series([
 						function(next){ 
 
+							// Gets Answer's Question's id.
 							Answer.findOne({
 								where: {id: a_id},
 								attributes: ['question_id']
@@ -257,6 +258,7 @@ async.parallel(
 						},
 						function(next){ 
 
+							// Check if Question has existing vote from this User.
 							Vote.findOne({
 								where: {q_id: q_id, user_id: u_id },
 								attributes: ['id']
@@ -275,6 +277,7 @@ async.parallel(
 						},
 						function(next){ 
 
+							// Creates Vote associated User, for a Question's Answer 
 							Vote.create({
 								id: _id,
 								user_id: u_id,
@@ -287,6 +290,7 @@ async.parallel(
 						},
 						function(next){ 
 
+							// Increments Answer's vote count.
 							Answer.update({
 								count: Sequelize.literal('count + 1')
 							},{
