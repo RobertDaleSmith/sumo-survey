@@ -105,8 +105,8 @@ Question = db.define('question', {
 
 
 // model associations
-Question.hasMany(Answer, { onDelete: 'cascade', hooks: true });
-Answer.belongsTo(Question, { onDelete: 'cascade', hooks: true });
+Question.hasMany(Answer, { onDelete: 'cascade'});
+Answer.belongsTo(Question, { onDelete: 'cascade'});
 
 User.hasMany(Vote, { onDelete: 'cascade', hooks: true });
 Vote.belongsTo(User, { onDelete: 'cascade', hooks: true });
@@ -191,7 +191,10 @@ async.parallel(
 							votes.forEach(function(vote){
 								if(vote.dataValues) results.push(vote.dataValues.q_id);
 							});
-							answered = results;
+
+							if(results.length<1) answered = null;
+							else answered = results;
+							
 							next();
 						});
 						
@@ -478,7 +481,7 @@ async.parallel(
 					Question.destroy({
 						where: { id: _id }
 					}).then(function(question){
-						res.send({'status':'success'});
+						res.send({'status':'deleted'});
 					});
 
 				}else{
@@ -546,7 +549,7 @@ async.parallel(
 					Answer.destroy({
 						where: { id: _id }
 					}).then(function(answer){
-						res.send({'status':'success'});
+						res.send({'status':'deleted'});
 					});
 
 				}else{
