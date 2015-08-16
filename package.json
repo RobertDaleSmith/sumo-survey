@@ -15,6 +15,8 @@
     "dustjs-helpers": "^1.7.3",
     "dustjs-linkedin": "^2.7.2",
     "express": "^4.13.3",
+    "express-sequelize-session": "^0.4.0",
+    "express-session": "^1.11.3",
     "multer": "^1.0.3",
     "mysql": "^2.8.0",
     "node-uuid": "^1.4.3",

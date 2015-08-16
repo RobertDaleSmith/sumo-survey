@@ -15,9 +15,11 @@ var cons = require('consolidate');
 var dust = require('dustjs-linkedin');
 	dust.helper = require('dustjs-helpers');
 var express = require('express');
+var expressSession = require('express-session');
 var multer = require('multer');
 var mysql = require('mysql');
 var Sequelize = require('sequelize');
+var Store = require('express-sequelize-session')(expressSession.Store);
 var uuid = require('node-uuid');
 
 
@@ -25,7 +27,7 @@ var uuid = require('node-uuid');
 var app = express();
 var config = require('./config.json');
 var port = config.port || 8080;
-var db, Admin, Guest, Question, Answer;
+var db, Session, Admin, User, Vote, Question, Answer;
 
 app.set('port', port);
 app.use(express.static(__dirname + '/public', {redirect: false}));
@@ -46,16 +48,38 @@ db = new Sequelize(config.mysql.schema, config.mysql.username, config.mysql.pass
 });
 
 
+// init sessions
+var store = new Store(db, 'session');
+app.use(expressSession({
+	name: 'sid',
+	secret: 'MyAwesomeAppSessionSecret',
+	store: store,
+	resave: false,
+	saveUninitialized: true
+}));
+
+
 // define models
+Session = store.Session;
+
 Admin = db.define('admin', {
-	username: Sequelize.STRING,
+	username: { type: Sequelize.STRING, unique: true},
 	password: Sequelize.STRING
 },{	freezeTableName: true });
 
-Guest = db.define('guest', {
-	_id: Sequelize.STRING,
-	name: { type: Sequelize.STRING, allowNull: false },
-	email: { type: Sequelize.STRING, allowNull: false }
+User = db.define('user', {
+	id: {
+      type: Sequelize.UUID,
+      primaryKey: true
+    },
+	email: { type: Sequelize.STRING, allowNull: true }
+},{	freezeTableName: true });
+
+Vote = db.define('vote', {
+	id: {
+      type: Sequelize.UUID,
+      primaryKey: true
+    }
 },{	freezeTableName: true });
 
 Answer = db.define('answer', {
@@ -78,263 +102,339 @@ Question = db.define('question', {
 
 
 // model associations
-Question.hasMany(Answer, { foreignKeyConstraint: true, onDelete: 'cascade', hooks: true });
-Answer.belongsTo(Question, { foreignKeyConstraint: true, onDelete: 'cascade', hooks: true });
+Question.hasMany(Answer, { onDelete: 'cascade', hooks: true });
+Answer.belongsTo(Question, { onDelete: 'cascade', hooks: true });
 
 
 // sync tables
 async.parallel(
 	[
+		function(next){ Session.sync(config.mysql.options).then(next);	},
 		function(next){ Admin.sync(config.mysql.options).then(next);	},
-		function(next){ Guest.sync(config.mysql.options).then(next);	},
+		function(next){ User.sync(config.mysql.options).then(next);		},
 		function(next){ Answer.sync(config.mysql.options).then(next);	},		
 		function(next){ Question.sync(config.mysql.options).then(next);	}
 	], 
 	function(){
-
 		console.log("\n--- DB READY ---\n");
 
 		// init an admin
-		Admin.create(config.admin);
+		// Admin.create(config.admin);
 
-// routes
-	
-		app.get('/survey', function( req, res, next ) {
 
-			Question.findAll({
-				attributes: ['id', 'text'],
-				include: [{
-					model: Answer,
-					required: false,
-					where: { questionId: Sequelize.col('question.id') },
-					attributes: ['id', 'text', 'order']
-				}],
-				limit: 1,
-				order: ['created_at', 'answers.order']
-			}).then(function(questions) {
+		// middleware
 
-				var result = {};
+			//Checks for token ID and if user exists, generates new user if none and returns UUID as token.
+			function checkUser(req, res, next) {
 
-				if(questions.length > 0) result=questions[0].dataValues;
+				var token = req.session.token || null;
 				
-				res.send(result);
+				// No token found, generate new User.
+				if(!token){
+				
+					var _id = uuid.v4();
+					
+					req.session.token = _id;
+
+					User.create({
+						id: _id,
+						email: null
+					}).then(function(user){
+						next();
+					});
+
+				}else{
+
+					next();
+
+				}
+
+			}
+			function checkAdmin(req, res, next) {
+
+				console.log('\nCHECKING FOR Admin TOKEN...\n');
+				next();
+
+			}
+
+		// public routes
+			
+			// Get next unanswered Question
+			app.get('/survey', checkUser, function( req, res, next ) {
+
+				console.log('\n');
+				console.log(req.session.token);
+				console.log('\n');
+				
+				
+				//TODO: Gets random question unanswered by user.
+				
+				//TODO: If all answered, then requests email.
+
+				Question.findAll({
+					attributes: ['id', 'text'],
+					include: [{
+						model: Answer,
+						required: false,
+						where: { questionId: Sequelize.col('question.id') },
+						attributes: ['id', 'text', 'order']
+					}],
+					limit: 1,
+					order: ['created_at', 'answers.order']
+				}).then(function(questions) {
+
+					var result = {};
+
+					if(questions.length > 0) result=questions[0].dataValues;
+					
+					res.send(result);
+
+				});
 
 			});
 
-		});
+			// Cast Vote for an Answer and get next unanswered Question
+			app.post('/survey', checkUser, function( req, res, next ) {
 
-// admin routes
-		
-		// Admin interface
-		app.get( '/admin', function( req, res, next ) {
-			res.send({'status':'admin'});
-		});
+				var _id = uuid.v4();
+				var a_id = req.query.a_id || null;
+				var q_id = req.query.q_id || null;
+				var u_id = req.query.u_id || null;
 
-		// Admin token request
-		app.post( '/admin/signin', function( req, res, next ) {
+				if(a_id && q_id && u_id) {
 
-			var username = req.body.username || "";
-			var password = req.body.password || "";
 
-			Admin.findOne({
-				where: {username: username},
-				attributes: ['username', 'password']
-			}).then(function(admin) {
 
-				if(admin) admin=admin.dataValues;
-
-				if(admin && admin.password==password){
-
-					// Add new guest to DB.
-
-					// Generate JWT containing guest's id.
-
-					res.send({'status':'success'});
-
-				} else {
+				}else{
 					res.send({'error':true});
 				}
 
 			});
 
-		});
+			//TODO: Submit vote route
+			//	increments count on answer
+			//  adds new vote
+			//  returns next unanwered question
 
 
+			//TODO: Submit name/email route
 
-		// Get all Questions with Answers
-		app.get('/questions', function( req, res, next ) {
 
-			Question.findAll({
-				include: [{
-					model: Answer,
-					required: false,
-					where: { questionId: Sequelize.col('question.id') }
-				}],
-				order: ['created_at', 'answers.order']
-			}).then(function(questions) {
+		// admin routes
+			
+			//TODO: protect routes with JWT verified token.
 
-				var results = [];
 
-				// console.log(questions);
+			// Admin interface
+			app.get( '/admin', function( req, res, next ) {
+				res.send({'status':'admin'});
+			});
 
-				questions.forEach(function(question){
-					results.push(question.dataValues);
+			// Admin token request
+			app.post( '/admin/signin', function( req, res, next ) {
+
+				var username = req.body.username || "";
+				var password = req.body.password || "";
+
+				Admin.findOne({
+					where: {username: username},
+					attributes: ['username', 'password']
+				}).then(function(admin) {
+
+					if(admin) admin=admin.dataValues;
+
+					if(admin && admin.password==password){
+
+						//TODO: Add new user to DB.
+
+						//TODO: Generate JWT containing user's id.
+
+						res.send({'status':'success'});
+
+					} else {
+						res.send({'error':true});
+					}
+
 				});
-
-				res.send(results);
 
 			});
 
-		});
+
+			
 
 
+			// Get all Questions with Answers
+			app.get('/questions', checkAdmin, function( req, res, next ) {
 
-		// Get a Question and it's Answers
-		app.get('/question', function( req, res, next ) {
-
-			var _id = req.query._id || null;
-
-			if(_id){
-
-				Question.findOne({
-					where: {
-						id: _id
-					},
+				Question.findAll({
 					include: [{
 						model: Answer,
 						required: false,
 						where: { questionId: Sequelize.col('question.id') }
 					}],
-					order: ['answers.order']
-				}).then(function(question){
-					var result = question || {};
-					res.send(question);
+					order: ['created_at', 'answers.order']
+				}).then(function(questions) {
+
+					var results = [];
+
+					// console.log(questions);
+
+					questions.forEach(function(question){
+						results.push(question.dataValues);
+					});
+
+					res.send(results);
+
 				});
 
-			}else{
-				res.send({'error':true});
-			}
+			});
 
-		});
+			// Get a Question and it's Answers
+			app.get('/question', checkAdmin, function( req, res, next ) {
 
-		// Add a Question
-		app.post('/question', function( req, res, next ) {
+				var _id = req.query._id || null;
 
-			var _id = uuid.v4();
-			var text = req.query.text || "";
+				if(_id){
 
-			if(text!=""){
+					Question.findOne({
+						where: {
+							id: _id
+						},
+						include: [{
+							model: Answer,
+							required: false,
+							where: { questionId: Sequelize.col('question.id') }
+						}],
+						order: ['answers.order']
+					}).then(function(question){
+						var result = question || {};
+						res.send(question);
+					});
 
-				Question.create({
-					id: _id,
-					text: text
-				}).then(function(question){
-					res.send(question);
-				});
+				}else{
+					res.send({'error':true});
+				}
 
-			}else{
-				res.send({'error':true});
-			}
+			});
 
-		});
+			// Add a Question
+			app.post('/question', checkAdmin, function( req, res, next ) {
 
-		// Remove a Question and it's Answers
-		app.delete('/question', function( req, res, next ) {
+				var _id = uuid.v4();
+				var text = req.query.text || "";
 
-			var _id = req.query._id || "";
+				if(text!=""){
 
-			if(_id!=""){
+					Question.create({
+						id: _id,
+						text: text
+					}).then(function(question){
+						res.send(question);
+					});
 
-				Question.destroy({
-					where: { id: _id }
-				}).then(function(question){
-					res.send({'status':'success'});
-				});
+				}else{
+					res.send({'error':true});
+				}
 
-			}else{
-				res.send({'error':true});
-			}
+			});
 
-		});
+			// Remove a Question and it's Answers
+			app.delete('/question', checkAdmin, function( req, res, next ) {
 
+				var _id = req.query._id || "";
 
+				if(_id!=""){
 
+					Question.destroy({
+						where: { id: _id }
+					}).then(function(question){
+						res.send({'status':'success'});
+					});
 
-		// Get an Answer
-		app.get('/answer', function( req, res, next ) {
+				}else{
+					res.send({'error':true});
+				}
 
-			var _id = req.query._id || null;
-
-			if(_id){
-
-				Answer.findOne({
-					where: {
-						id: _id
-					}
-				}).then(function(answer){
-					var result = answer || {};
-					res.send(result);
-				});
-
-			}else{
-				res.send({'error':true});
-			}
-
-		});
-
-		// Add an Answer to a Question
-		app.post('/answer', function( req, res, next ) {
-
-			var _id = uuid.v4();
-			var text = req.query.text || "";
-			var q_id = req.query.q_id || null;
-			var order = req.query.order || 0;
-
-			if(q_id && text!=""){
-
-				Answer.create({
-					id: _id,
-					question_id: q_id,
-					text: text,
-					order: order,
-					count: 0
-				}).then(function(answer){
-					res.send(answer);
-				});
-
-			}else{
-				res.send({'error':true});
-			}
-
-		});
-
-		// Remove an Answer
-		app.delete('/answer', function( req, res, next ) {
-
-			var _id = req.query._id || "";
-
-			if(_id!=""){
-
-				Answer.destroy({
-					where: { id: _id }
-				}).then(function(answer){
-					res.send({'status':'success'});
-				});
-
-			}else{
-				res.send({'error':true});
-			}
-
-		});
+			});
 
 
 
-		// 404 to root
-		app.get( '*', function( req, res, next ) { res.redirect('/'); });
- 
-		// initializing a port
-		app.listen(port);
 
-	}
+			// Get an Answer
+			app.get('/answer', checkAdmin, function( req, res, next ) {
+
+				var _id = req.query._id || null;
+
+				if(_id){
+
+					Answer.findOne({
+						where: {
+							id: _id
+						}
+					}).then(function(answer){
+						var result = answer || {};
+						res.send(result);
+					});
+
+				}else{
+					res.send({'error':true});
+				}
+
+			});
+
+			// Add an Answer to a Question
+			app.post('/answer', checkAdmin, function( req, res, next ) {
+
+				var _id = uuid.v4();
+				var text = req.query.text || "";
+				var q_id = req.query.q_id || null;
+				var order = req.query.order || 0;
+
+				if(q_id && text!=""){
+
+					Answer.create({
+						id: _id,
+						question_id: q_id,
+						text: text,
+						order: order,
+						count: 0
+					}).then(function(answer){
+						res.send(answer);
+					});
+
+				}else{
+					res.send({'error':true});
+				}
+
+			});
+
+			// Remove an Answer
+			app.delete('/answer', checkAdmin, function( req, res, next ) {
+
+				var _id = req.query._id || "";
+
+				if(_id!=""){
+
+					Answer.destroy({
+						where: { id: _id }
+					}).then(function(answer){
+						res.send({'status':'success'});
+					});
+
+				}else{
+					res.send({'error':true});
+				}
+
+			});
+
+
+
+			// 404 to root
+			app.get( '*', function( req, res, next ) { res.redirect('/'); });
+	 
+			// initializing a port
+			app.listen(port);
+
+		}
 
 );
