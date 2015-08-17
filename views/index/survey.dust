@@ -5,5 +5,12 @@
 {<html_body}
 
 	<!-- index/survey.dust -->
+	{#question}
+		<br>{.text}<br><br>
+
+		{#answers}
+			{.text}<br>
+		{/answers}
+	{/question}
 
 {/html_body}

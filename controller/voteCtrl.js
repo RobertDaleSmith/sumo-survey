@@ -61,10 +61,11 @@ VoteCtrl.getNextQuestion = function(req, res) {
 
 		}
 	],function(result){
-
-		res.send(result);
-
-		//Render question/answer form.
+		
+		//Render single qurstion survey form.
+		res.render( 'index/survey', {
+            question: result
+        });
 
 	});
 };
