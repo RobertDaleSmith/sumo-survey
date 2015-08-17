@@ -18,7 +18,7 @@ AdminCtrl.adminDash = function(req, res) {
         // Renders Admin Dashboard page.
         res.render( 'admin/dash', {
             title:  'Dashboard',
-            pageId: 'adminUsers',
+            pageId: 'dash',
             admin: req.session.admin
         });
 

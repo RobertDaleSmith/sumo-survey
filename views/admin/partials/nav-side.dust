@@ -3,11 +3,14 @@
     <div class="sidebar-nav navbar-collapse">
         <ul class="nav" id="side-menu">
             <li>
-                <a href="/admin"{@if cond="'{.pageId}' == 'dash'"} class="active"{/if}><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                <a href="/admin"{@eq key="{pageId}" value="dash"} class="active"{/eq}><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
             </li>
 
+            
+
+
             <li>
-                <a href="/admin/questions"{@if cond="'{.pageId}' == 'questions'"} class="active"{/if}><i class="fa fa-pencil-square-o fa-fw"></i> Survey Questions</a>
+                <a href="/admin/questions"{@eq key="{pageId}" value="questions"} class="active"{/eq}><i class="fa fa-pencil-square-o fa-fw"></i> Survey Questions</a>
             </li>
 
             <!-- <li>
