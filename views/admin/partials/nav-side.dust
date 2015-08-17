@@ -2,24 +2,23 @@
 <div class="navbar-default sidebar" role="navigation">
     <div class="sidebar-nav navbar-collapse">
         <ul class="nav" id="side-menu">
-           <!--  <li class="sidebar-search">
-                <div class="input-group custom-search-form">
-                    <input type="text" class="form-control" placeholder="Search...">
-                    <span class="input-group-btn">
-                    <button class="btn btn-default" type="button">
-                        <i class="fa fa-search"></i>
-                    </button>
-                </span>
-                </div>
-            </li> -->
             <li>
                 <a href="/admin"{@if cond="'{.pageId}' == 'dash'"} class="active"{/if}><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
             </li>
+
+            <li>
+                <a href="/admin/questions"{@if cond="'{.pageId}' == 'dash'"} class="active"{/if}><i class="fa fa-pencil-square-o fa-fw"></i> Survey Questions</a>
+            </li>
+
+            <li>
+                <a href="/admin/reports"{@if cond="'{.pageId}' == 'dash'"} class="active"{/if}><i class="fa fa-bar-chart-o fa-fw"></i> Reports</a>
+            </li>
+
             <li {@if cond="'{.pageId}' == 'endUsers' || '{.pageId}' == 'adminUsers'"}class="active"{/if}>
                 <a href="#"><i class="fa fa-users fa-fw"></i> Users<span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level">
                     <li>
-                        <a href="#" {@if cond="'{.pageId}' == 'endUsers'"} class="active"{/if}>Voters</a>
+                        <a href="#" {@if cond="'{.pageId}' == 'endUsers'"} class="active"{/if}>Guests</a>
                     </li>
                     <li>
                         <a href="#" {@if cond="'{.pageId}' == 'adminUsers'"} class="active"{/if}>Admins</a>
