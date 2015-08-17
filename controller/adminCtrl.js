@@ -10,11 +10,28 @@ var uuid = require('node-uuid');
 
 // Admin interface
 AdminCtrl.adminDash = function(req, res) {
+
     if(req.session.loggedIn){
-        res.send({'status':'loggedIn'});
+
+        //TODO: Query real stats for dashboard.
+
+        // Renders Admin Dashboard page.
+        res.render( 'admin/dash', {
+            title:  'Dashboard',
+            pageId: 'adminUsers',
+            admin: req.session.admin
+        });
+
     }else {
-        res.send({'status':'loggedOut'});
+        
+        // Renders Admin Login page
+        res.render('admin/login', {
+            title:  'Login',
+            error: req.flash('error')
+        });
+
     }
+
 };
 
 // Admin log-in post
@@ -48,14 +65,25 @@ AdminCtrl.loginAdmin = function(req, res) {
             if(bcrypt.compareSync(password, admin.password)){
 
                 loginSuccess(admin);
-                // res.send({'status':'success'});
 
             } else {
-                res.send({'error':false}); // Password invalid.
+
+                // Password invalid.
+                req.flash('error', 'Invalid Username or Password.');
+                req.session.save(function (err) {
+                    res.redirect('/admin');
+                });
+
             }
                 
         } else {
-            res.send({'error':true}); // User not found.
+
+            // User not found.
+            req.flash('error', 'Invalid Username or Password.');
+            req.session.save(function (err) {
+                res.redirect('/admin');
+            });
+
         }
         
 

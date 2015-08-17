@@ -55,14 +55,16 @@ VoteCtrl.getNextQuestion = function(req, res) {
 					var idx = Math.round(Math.random()*max);
 					result=questions[idx].dataValues;
 				}
-				res.send(result);
+				next(result);
 
 			});
 
 		}
-	],function(){
+	],function(result){
 
-		res.send({'status':'voted'});
+		res.send(result);
+
+		//Render question/answer form.
 
 	});
 };

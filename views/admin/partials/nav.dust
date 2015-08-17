@@ -1,0 +1,5 @@
+<!-- nav.dust -->
+<nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+    {>"admin/partials/nav-top"/}
+    {>"admin/partials/nav-side"/}
+</nav>

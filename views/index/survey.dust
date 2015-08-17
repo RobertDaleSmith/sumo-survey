@@ -1,0 +1,9 @@
+{>"layouts/main_index"/}
+
+{<title}{title}{/title}
+
+{<html_body}
+
+	<!-- index/survey.dust -->
+
+{/html_body}

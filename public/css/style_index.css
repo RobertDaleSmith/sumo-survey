@@ -1,0 +1,50 @@
+*, *:before, *:after {
+    -webkit-box-sizing: border-box; /* Needed for mobile WebKit */
+       -moz-box-sizing: border-box; /* Needed for Firefox */
+            box-sizing: border-box;
+
+  -webkit-user-select: none;
+   -khtml-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none; /* IE 10+ */
+          user-select: none;
+}
+
+
+html, body{
+  height: 100%;
+  padding: 0px; 
+  margin: 0px;
+}
+
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  text-align: center;
+  background-color: #f2f2f2;
+  color: #4a4a4a;
+}
+
+input{
+  -webkit-user-select: initial;
+   -khtml-user-select: initial;
+     -moz-user-select: initial;
+      -ms-user-select: initial; /* IE 10+ */
+          user-select: initial;
+}
+
+a{
+  color:#4a4a4a;
+  font-weight: 700;
+  text-decoration: none;
+
+  border-style: solid;
+  border-width: 0 0 1px 0;
+  border-color: rgba(74,74,74,0.25);
+}
+  a:hover{
+    border-color: rgba(74,74,74,1);
+  }
+
+
