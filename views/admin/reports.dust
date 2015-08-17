@@ -1,0 +1,29 @@
+{>"layouts/main_admin"/}
+
+{<title}{title}{/title}
+
+{<html_body}
+  <div id="wrapper">
+
+    <!-- Navigation -->
+    {>"admin/partials/nav"/}
+
+    <!-- Page Content -->
+    <div id="page-wrapper">
+      <div class="row">
+        <div class="col-lg-12">
+          <h1 class="page-header">Reports</h1>
+        </div>
+        <!-- /.col-lg-12 -->
+      </div>
+      <!-- /.row -->
+
+      <div class="row">
+          
+      </div>
+      <!-- /.row -->
+    </div>
+    <!-- /#page-wrapper -->
+
+  </div>
+{/html_body}

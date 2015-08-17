@@ -66,6 +66,144 @@ input, .selectable{
   font-style: italic;
 }
 
+#wrapper{
+  display: inline-block;
+  position: relative;
+  height: auto;
+  width: 100%;
+}
+
+@media (min-width: 768px){
+  
+  #page-wrapper {
+    display: inline-block;
+    position: relative;
+    height: auto;
+    width: calc(100% - 250px);
+    margin: 0 0 0 250px;
+    padding: 0 30px;
+    border-left: 1px solid #e7e7e7;
+      
+  }
+
+}
+
+
+.page-header{
+  height: 60px;
+  padding-bottom: 9px;
+  margin: 40px 0 0;
+}
+
 .userName{
   font-weight: 700;
 }
+
+
+
+#addQuestionBtn{
+  float: right;
+  width: auto;
+}
+
+
+.questionText{
+  float: left;
+  width: auto;
+  font-weight: bold;
+  margin: 0 15px 0 0;
+}
+
+
+#questionsWrapper{
+  display: block;
+  position: relative;
+  
+  width: 100%;
+  height: auto;
+  float: left;
+
+  margin: 0 0 20px 0;
+
+}
+
+  .question{
+    display: inline-block;
+    position: relative;
+    
+    width: 100%;
+    height: auto;
+    float: left;
+
+    border-style: solid;
+    border-width: 1px 0 0 0;
+    border-color: #eee;
+    padding: 10px 0 20px 0;
+
+  }
+
+    .addAnswerBtn{
+      display: inline-block;
+      position: relative;
+      float: right;
+      width: auto;
+      margin: 0 3px;
+    }
+    .delQuestionBtn{
+      display: inline-block;
+      position: relative;
+      float: right;
+      width: auto;
+      margin: 0 0 3px 3px;
+          font-weight: bold;
+    }
+    .answersWrapper{
+      display: block;
+      position: relative;
+      
+      width: 100%;
+      height: auto;
+      float: left;
+      margin: 10px 0 0 0;
+    }
+      .answer{
+        display: block;
+        position: relative;
+        
+        width: 100%;
+        height: auto;
+        float: left;
+        padding: 4px 0;
+
+      }
+        .answer.even{
+          background-color: rgb(249, 249, 249);
+        }
+
+        .answer .text{
+          float: left;
+          width: auto;
+          margin: 0 15px 0 0;
+        }
+
+        .answer .count{
+          float: right;
+          width: auto;
+
+          background-color: #E0E0E0;
+          margin: 4px 15px 0 0;
+          padding: 2px 6px;
+          height: 24px; line-height: 20px;
+          width: auto;
+          border-radius: 6px;
+          font-size: 12px;
+
+          color: #464646;
+
+        }
+
+        .answer .delAnswerBtn{
+          float: right;
+          width: auto;
+          margin: 0 0 3px 3px;
+        }

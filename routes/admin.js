@@ -26,6 +26,12 @@ router.post( '/admin', AdminCtrl.loginAdmin);
 // Admin log-out
 router.get( '/admin/logout', AdminCtrl.logoutAdmin);
 
+// Renders Edit Survey Questions page
+router.get( '/admin/questions', AdminCtrl.renderQuestions);
+
+// Renders Reports page
+router.get( '/admin/reports', AdminCtrl.renderReports);
+
 
 // Get a Question and it's Answers
 router.get('/question', requireAdmin, QuestionCtrl.getQuestion);

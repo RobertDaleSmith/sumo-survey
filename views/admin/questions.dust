@@ -1,0 +1,54 @@
+{>"layouts/main_admin"/}
+
+{<title}{title}{/title}
+
+{<html_body}
+  <div id="wrapper">
+
+    <!-- Navigation -->
+    {>"admin/partials/nav"/}
+
+    <!-- Page Content -->
+    <div id="page-wrapper">
+      <div class="row">
+        <div class="col-lg-12">
+          
+          <h1 class="page-header">Questions <div id="addQuestionBtn" class="btn btn-lg btn-primary btn-block"><i class="fa fa-plus"></i> Add</div></h1>
+
+        </div>
+        <!-- /.col-lg-12 -->
+      </div>
+      <!-- /.row -->
+
+      <div id="questionsWrapper">
+
+        {#questions}
+          <div class="question" qid="answer_{question.id}">
+
+              <span class="questionText">{text}</span>
+              <span class="delQuestionBtn btn btn-sm btn-danger"><i class="fa fa-times"></i></span>
+              <span class="addAnswerBtn btn btn-sm btn-success"><i class="fa fa-plus"></i> Answer</span>
+              
+              <div class="answersWrapper">
+              {#.answers}
+                
+                <div class="answer {@math key=$idx method="mod" operand=2}{@eq value=0}even{/eq}{/math}" aid="answer_{id}">
+                  <span class="text">{order}.&nbsp;&nbsp;{text}</span>
+
+                  <span class="delAnswerBtn btn btn-sm btn-danger"><i class="fa fa-times"></i></span>
+                  <span class="count">{count} votes</span>
+                </div>
+                
+              {/.answers}
+              </div>
+
+          </div>
+        {/questions}
+          
+      </div>
+      <!-- /.row -->
+    </div>
+    <!-- /#page-wrapper -->
+
+  </div>
+{/html_body}

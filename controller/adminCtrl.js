@@ -3,8 +3,8 @@ var AdminCtrl = module.exports = {};
 
 var config = require('../config.json');
 var db = require('../models');
-
 var bcrypt = require('bcrypt-nodejs'); 
+var Sequelize = require('sequelize');
 var uuid = require('node-uuid');
 
 
@@ -97,6 +97,44 @@ AdminCtrl.logoutAdmin = function(req, res) {
     req.session.save(function (err) {
         res.redirect('/admin');
     });
+};
+
+
+// Renders Edit Survey Questions page
+AdminCtrl.renderQuestions = function(req, res) {
+    db.Question.findAll({
+        include: [{
+            model: db.Answer,
+            required: false,
+            where: { questionId: Sequelize.col('question.id') }
+        }],
+        order: ['created_at', 'answers.order']
+    }).then(function(questions) {
+
+        var results = [];
+        questions.forEach(function(question){
+            results.push(question.dataValues);
+        });
+
+        res.render( 'admin/questions', {
+            title:  'Questions',
+            pageId: 'questions',
+            admin: req.session.admin,
+            questions: results
+        });
+
+    });
+};
+
+// Renders Reports page
+AdminCtrl.renderReports = function(req, res) {
+    
+    res.render( 'admin/reports', {
+        title:  'Reports',
+        pageId: 'reports',
+        admin: req.session.admin
+    });
+
 };
 
 

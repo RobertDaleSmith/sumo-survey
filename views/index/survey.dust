@@ -20,7 +20,7 @@
 
 					<div class="form-group">
 						<input type='radio' name='_id' id='answer_{$idx}' value='{.id}' required>
-						<label for='answer_{$idx}'>{question.text}</label>
+						<label for='answer_{$idx}'>{text}</label>
 					</div>
 					
 				{/question.answers}

@@ -7,14 +7,14 @@
             </li>
 
             <li>
-                <a href="/admin/questions"{@if cond="'{.pageId}' == 'dash'"} class="active"{/if}><i class="fa fa-pencil-square-o fa-fw"></i> Survey Questions</a>
+                <a href="/admin/questions"{@if cond="'{.pageId}' == 'questions'"} class="active"{/if}><i class="fa fa-pencil-square-o fa-fw"></i> Survey Questions</a>
             </li>
 
-            <li>
-                <a href="/admin/reports"{@if cond="'{.pageId}' == 'dash'"} class="active"{/if}><i class="fa fa-bar-chart-o fa-fw"></i> Reports</a>
-            </li>
+            <!-- <li>
+                <a href="/admin/reports"{@if cond="'{.pageId}' == 'reports'"} class="active"{/if}><i class="fa fa-bar-chart-o fa-fw"></i> Reports</a>
+            </li> -->
 
-            <li {@if cond="'{.pageId}' == 'endUsers' || '{.pageId}' == 'adminUsers'"}class="active"{/if}>
+            <!-- <li {@if cond="'{.pageId}' == 'endUsers' || '{.pageId}' == 'adminUsers'"}class="active"{/if}>
                 <a href="#"><i class="fa fa-users fa-fw"></i> Users<span class="fa arrow"></span></a>
                 <ul class="nav nav-second-level">
                     <li>
@@ -24,8 +24,7 @@
                         <a href="#" {@if cond="'{.pageId}' == 'adminUsers'"} class="active"{/if}>Admins</a>
                     </li>
                 </ul>
-                <!-- /.nav-second-level -->
-            </li>
+            </li> -->
             
         </ul>
     </div>
