@@ -1,6 +1,10 @@
-var Sequelize = require('sequelize');
-var config = require('../config.json');
+
 var models = module.exports = {};
+
+var AdminCtrl = require('../controller/AdminCtrl.js');
+var config = require('../config.json');
+var Sequelize = require('sequelize');
+
 
 // init database
 var sequelize = new Sequelize(config.mysql.schema, config.mysql.username, config.mysql.password, {
@@ -18,8 +22,16 @@ var sequelize = new Sequelize(config.mysql.schema, config.mysql.username, config
 	}
 });
 
+// syncs db tables, adds table if new
 var syncTables = function(ready){
-	models.sequelize.sync(config.mysql.options).then(ready);
+	models.sequelize.sync(config.mysql.options).then(function(){
+
+		// init admin if none
+		AdminCtrl.checkAdmin();
+
+		// tables synced and DB ready for action
+		ready();
+	});
 }
 
 // define models
