@@ -49,7 +49,7 @@ VoteCtrl.getNextQuestion = function(req, res) {
 				order: ['answers.order']
 			}).then(function(questions) {
 
-				var result = {};
+				var result = null;
 				if(questions.length > 0) {
 					var max = questions.length-1;
 					var idx = Math.round(Math.random()*max);
@@ -73,8 +73,8 @@ VoteCtrl.getNextQuestion = function(req, res) {
 // Cast Vote for an Answer and get next unanswered Question
 VoteCtrl.submitVote = function(req, res) {
 	var _id = uuid.v4();
-	var a_id = req.query._id || null;
-	var q_id = req.query.q_id || "";
+	var a_id = req.body._id || null;
+	var q_id = req.body.q_id || "";
 	var u_id = req.session.token || null;
 
 	if(a_id && u_id) {
@@ -140,11 +140,13 @@ VoteCtrl.submitVote = function(req, res) {
 		],function(err){
 
 			var status = err || 'voted';
-			res.send({'status':status});
+			req.session.save(function (err) {
+	            res.redirect('/');
+	        });
 
 		});
 
 	}else{
-		res.send({'error':true});
+		res.send({'status':'error'});
 	}
 };

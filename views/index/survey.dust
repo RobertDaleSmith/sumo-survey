@@ -5,12 +5,34 @@
 {<html_body}
 
 	<!-- index/survey.dust -->
-	{#question}
-		<br>{.text}<br><br>
 
-		{#answers}
-			{.text}<br>
-		{/answers}
+	{?question}
+		<br><div class="questionText">{question.text}<div><br><br>
+
+		<form action="/vote" method="POST" role="form">
+			<fieldset>
+				
+				<div class="form-group">
+					<input class="form-control" placeholder="q_id" name="q_id" type="hidden" required="" value="{question.id}">
+				</div>
+
+				{#question.answers}
+
+					<div class="form-group">
+						<input type='radio' name='_id' id='answer_{$idx}' value='{.id}' required>
+						<label for='answer_{$idx}'>{question.text}</label>
+					</div>
+					
+				{/question.answers}
+
+				<button class="btn btn-lg btn-success btn-block" type="submit">Submit</button>
+
+			</fieldset>
+		</form>
+	{:else}
+
+		<div id="thank-you">That's all folks.</div>
+
 	{/question}
 
 {/html_body}
