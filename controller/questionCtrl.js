@@ -3,6 +3,7 @@ var QuestionCtrl = module.exports = {};
 
 var db = require('../models');
 
+var async = require('async');
 var Sequelize = require('sequelize');
 var uuid = require('node-uuid');
 
@@ -35,21 +36,60 @@ QuestionCtrl.getQuestion = function(req, res) {
 
 // Add a Question
 QuestionCtrl.addQuestion = function(req, res) {
-    var _id = uuid.v4();
-    var text = req.query.text || "";
+    var q_id = uuid.v4();
+    var text = req.body.text || "";
+
+    var answers = req.body.answers || [];
+    var order = 0;
 
     if(text!=""){
 
-        db.Question.create({
-            id: _id,
-            text: text
-        }).then(function(question){
-            res.send(question);
+        async.parallel([
+            function(next){ 
+
+                db.Question.create({
+                    id: q_id,
+                    text: text
+                }).then(function(question){
+                    next();
+                });
+
+            },
+            function(next){ 
+
+                async.eachSeries(answers, function(answer, done) {
+
+                    var a_id = uuid.v4();
+                    var text = answer;
+                    order++;
+
+                    db.Answer.create({
+                        id: a_id,
+                        question_id: q_id,
+                        text: text,
+                        order: order,
+                        count: 0
+                    }).then(function(answer){
+                        done();
+                    });
+
+                }, function(err) {
+                    next();
+                });
+                
+            }
+        ],function(err){
+
+            var status = err || 'added';
+            res.send({'status':status});
+
         });
 
+        
     }else{
         res.send({'error':true});
     }
+
 };
 
 // Remove a Question and it's Answers

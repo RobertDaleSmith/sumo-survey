@@ -113,7 +113,7 @@ AdminCtrl.renderQuestions = function(req, res) {
 
         var results = [];
         questions.forEach(function(question){
-            results.push(question.dataValues);
+            results.unshift(question.dataValues);
         });
 
         res.render( 'admin/questions', {

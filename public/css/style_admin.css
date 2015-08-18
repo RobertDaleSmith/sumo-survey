@@ -93,7 +93,7 @@ input, .selectable{
 
 
 
-#addQuestionBtn{
+#addNewQuestionBtn{
   float: right;
   width: auto;
 }
@@ -207,7 +207,7 @@ input, .selectable{
 }
 
 
-.panel{
+#newQuestionWrapper .panel{
   display: inline-block;
   position: relative;
   float: left;

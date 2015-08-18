@@ -12,7 +12,7 @@
     <div id="page-wrapper">
       <div class="row">
         <div class="col-lg-12">
-          <h1 class="page-header">Questions <div id="addQuestionBtn" class="btn btn-md btn-primary btn-block"><i class="fa fa-plus"></i> New</div></h1>
+          <h1 class="page-header">Questions <div id="addNewQuestionBtn" class="btn btn-md btn-primary btn-block"><i class="fa fa-plus"></i> New</div></h1>
         </div>
         <!-- /.col-lg-12 -->
       </div>

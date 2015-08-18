@@ -10,7 +10,7 @@ var closeNewQuestionForm = function(){
 $(window).bind("load", function() {
 
 	// Opens New Question Form
-	$("#addQuestionBtn").click(function(){
+	$("#addNewQuestionBtn").click(function(){
 		$("#newQuestionWrapper").css('display','block');
 		$("#questionText").focus();
 	});
@@ -56,7 +56,7 @@ $(window).bind("load", function() {
 		var answersTx = [];
 		for(var i=0; i<answersEl.length; i++){
 			var text = $(answersEl[i]).val();
-			if(text!="")answersTx.push();
+			if(text!="")answersTx.push(text);
 		}
 
 		var question = {
@@ -64,10 +64,19 @@ $(window).bind("load", function() {
 			answers: answersTx
 		}
 
-		// AJAX POST Question/Answers
-		console.log(question);
+		if(questionTx != "" && answersTx.length>1){
+			
+			// AJAX POST Question/Answers
+			$.post('/question', question, function(res){
+				console.log(res);
+				window.location.reload();
+			});
 
-		closeNewQuestionForm();
+			console.log(question);
+			closeNewQuestionForm();
+		} else {
+			alert("Question can't be blank and it must have at least two answers.");
+		}
 
 	});
 
@@ -77,7 +86,7 @@ $(window).bind("load", function() {
 
 		console.log(question_id);
 
-		//AJAX POST to remove Question
+		$.delete('/question?_id='+question_id);
 
 		$("#q_"+question_id).remove();
 
