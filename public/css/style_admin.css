@@ -39,20 +39,12 @@ input, .selectable{
   color: #ff0000;
 }
 
-#addAdminShowModalBtn{
-  float: right;
-}
-
-/*#editAdminModal .modal-dialog .btn{
-  float: right;
-
-}*/
-#editAdminModal .modal-dialog .btn-group.left{
-  float: left;
-}
-
 #title_alert{
   margin-top: 40px;
+}
+
+#userDropdown{
+  float: right;
 }
 
 .dropdown-menu>li>p{
@@ -207,3 +199,45 @@ input, .selectable{
           width: auto;
           margin: 0 0 3px 3px;
         }
+
+
+#newQuestionWrapper{
+  display: none;
+  margin: 20px 0 0 0;
+}
+
+
+.panel{
+  display: inline-block;
+  position: relative;
+  float: left;
+}
+   .panel-contents{
+  display: inline-block;
+  position: relative;
+  float: left;
+  padding: 20px;
+   }
+
+  #newAnswersWrapper{
+    display: inline-block;
+    position: relative;
+    width: auto; height: auto;
+
+    margin: 10px 0 0 20px;
+  }
+
+    #newAnswersWrapper .input-group{
+      margin: 0 0 10px 0;
+    }
+
+  .controlsWrapper .btn{
+    float:right;
+    margin: 0 0 0 10px;
+  }
+
+  .controlsWrapper #addNewAnswerBtn.btn{
+    float: left;
+    margin: 0 0 0 20px;
+  }
+
