@@ -2,6 +2,7 @@
 var express = require('express');
 var router = express.Router();
 
+var UserCtrl = require('../controller/UserCtrl.js');
 var VoteCtrl = require('../controller/VoteCtrl.js');
 
 // User middleware
@@ -11,16 +12,12 @@ function requireUser(req, res, next) {
 	
 	// No token found, generate new User.
 	if(!token){
-	
-		var _id = uuid.v4();
-		
-		req.session.token = _id;
-
-		db.User.create({
-			id: _id,
-			email: null
-		}).then(function(user){
+				
+		UserCtrl.addUser(function(user){
+			console.log(user.id);
+			req.session.token = user.id;
 			next();
+
 		});
 
 	}else{

@@ -3,23 +3,66 @@ var AdminCtrl = module.exports = {};
 
 var config = require('../config.json');
 var db = require('../models');
+
+var async = require('async');
 var bcrypt = require('bcrypt-nodejs'); 
 var Sequelize = require('sequelize');
 var uuid = require('node-uuid');
 
+var getStats = function(cb){
+
+    var results = {
+        users: 0,
+        votes: 0,
+        questions: 0,
+        answers: 0
+    }
+
+    async.parallel([
+        function(next){ 
+            db.User.findAndCountAll().then(function(res) {
+                results.users = res.count;
+                next();
+            });
+        },
+        function(next){ 
+            db.Vote.findAndCountAll().then(function(res) {
+                results.votes = res.count;
+                next();
+            });
+        },
+        function(next){ 
+            db.Question.findAndCountAll().then(function(res) {
+                results.questions = res.count;
+                next();
+            });
+        },
+        function(next){ 
+            db.Answer.findAndCountAll().then(function(res) {
+                results.answers = res.count;
+                next();
+            });
+        }
+    ],function(err){
+        cb(results);
+    });
+
+}
 
 // Admin interface
 AdminCtrl.adminDash = function(req, res) {
 
     if(req.session.loggedIn){
 
-        //TODO: Query real stats for dashboard.
-
-        // Renders Admin Dashboard page.
-        res.render( 'admin/dash', {
-            title:  'Dashboard',
-            pageId: 'dash',
-            admin: req.session.admin
+        // Query real stats for dashboard.
+        getStats(function(counts){
+            // Renders Admin Dashboard page.
+            res.render( 'admin/dash', {
+                title:  'Dashboard',
+                pageId: 'dash',
+                admin: req.session.admin,
+                counts: counts
+            });
         });
 
     }else {

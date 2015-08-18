@@ -27,8 +27,8 @@
                               <i class="fa fa-users fa-5x"></i>
                           </div>
                           <div class="col-xs-9 text-right">
-                              <div class="huge">11</div>
-                              <div>New Users!</div>
+                              <div class="huge">{counts.users}</div>
+                              <div>Users</div>
                           </div>
                       </div>
                   </div>
@@ -49,8 +49,8 @@
                               <i class="fa fa-check-square-o fa-5x"></i>
                           </div>
                           <div class="col-xs-9 text-right">
-                              <div class="huge">30</div>
-                              <div>New Votes!</div>
+                              <div class="huge">{counts.votes}</div>
+                              <div>Votes</div>
                           </div>
                       </div>
                   </div>
@@ -71,7 +71,7 @@
                               <i class="fa fa-question-circle fa-5x"></i>
                           </div>
                           <div class="col-xs-9 text-right">
-                              <div class="huge">10</div>
+                              <div class="huge">{counts.questions}</div>
                               <div>Questions</div>
                           </div>
                       </div>
@@ -93,7 +93,7 @@
                               <i class="fa fa-exclamation-circle fa-5x"></i>
                           </div>
                           <div class="col-xs-9 text-right">
-                              <div class="huge">40</div>
+                              <div class="huge">{counts.answers}</div>
                               <div>Answers</div>
                           </div>
                       </div>
