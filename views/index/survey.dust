@@ -6,33 +6,87 @@
 
 	<!-- index/survey.dust -->
 
-	{?question}
-		<br><div class="questionText">{question.text}<div><br><br>
+	<div id="cta-modal" class="reveal-modal blue-bg open" data-reveal="" style="display: block; opacity: 1; visibility: visible; top: 100px;">
+        <div class="content-first">
+	        
+	        {?question}
+				<h2 class="white text-center">{question.text}</h2>
 
-		<form action="/vote" method="POST" role="form">
-			<fieldset>
-				
-				<div class="form-group">
-					<input class="form-control" placeholder="q_id" name="q_id" type="hidden" required="" value="{question.id}">
-				</div>
+				<form action="/vote" method="POST" role="form">
+					<fieldset>
+						
 
-				{#question.answers}
+						{#question.answers}
 
-					<div class="form-group">
-						<input type='radio' name='_id' id='answer_{$idx}' value='{.id}' required>
-						<label for='answer_{$idx}'>{text}</label>
-					</div>
-					
-				{/question.answers}
+							<div class="form-group">
+								<input type='radio' name='_id' id='answer_{$idx}' value='{.id}' required>
+								<label for='answer_{$idx}' class="blue-subtext text-center margin-top-sml">{text}</label>
+							</div>
+							
+						{/question.answers}
+						<div class="form-group">
+							<input class="form-control" placeholder="q_id" name="q_id" type="hidden" required="" value="{question.id}">
+						</div>
 
-				<button class="btn btn-lg btn-success btn-block" type="submit">Submit</button>
+						<div class="submitWrapper"><button class="button green semi-trans" type="submit">Submit</button></div>
 
-			</fieldset>
-		</form>
-	{:else}
+					</fieldset>
+				</form>
+			{:else}
 
-		<div id="thank-you">That's all folks.</div>
+				<div id="thank-you">That's all folks.</div>
 
-	{/question}
+			{/question}
 
+
+	        <!-- <form id="email-modal" class="clearfix" data-abide="" novalidate="novalidate">
+		      <label for="email-modal">
+		        <input type="email" name="modal-modal" placeholder="johndoe@mail.com" required="">
+		        <button class="button green semi-trans" type="submit">Submit</button>
+		      </label>
+		    </form> -->
+	        <p class="blue-subtext sml text-center margin-top-sml">Or just <a href="javascript:void(0);" class="hide-content-first" id="skipLink">skip this question.</a></p>
+	    </div>
+	    <a class="close-reveal-modal"><img src="/images/modal_exit.svg" onerror="this.src='//load.sumome.com/images/modal_exit.png'"></a>
+    </div>
+
+	<div class="hero app-intro">
+		<div class="gradient-bg-reverse">
+		  <div class="page-border"></div>
+
+		<div class="header">  
+		<div class="row">
+		  <div class="large-12 columns">  
+		    <div class="sumome left"><a href="/" title="SumoMe, free tools to grow your website traffic."><img src="/images/sumome-logo-2x.png"></a></div>
+		    <div class="nav right">        
+		      <a href="/admin" title="Admin">Admin</a>
+		    </div>
+		  </div><!-- .large-12 END -->
+		</div><!-- .row END -->
+		</div><!-- .header END -->
+
+		  <div class="row trans">
+		    <div class="large-6 columns margin">  
+		      <span class="icon"><img src="/images/surveyor-icon-512.png"></span>
+		      						   
+		      <h1 class="text-center">Read Your Users Minds with <b>Surveyor</b></h1>
+		      <div id="tryNowButton" class="button green semi-trans center">Try It Now</div>
+		    </div><!-- .large-6 END -->
+		    <div class="large-6 columns margin hero-img">  
+		        <img src="/images/surveyor-hero.png">
+		    </div><!-- .large-6 END -->
+
+		  </div><!-- .row END -->
+		</div><!-- .hero-bg END -->
+	</div>
+
+	<div id="free" class="row">
+		<div class="content-arrow"></div>
+	    <div class="large-12 columns margin">  
+	      <h3 class="text-center blue"></h3>
+	    </div><!-- .large-12 END -->
+	  <div class="clearfix"></div>
+	</div>
+
+	<div class="reveal-modal-bg" style="display: block;"></div>
 {/html_body}
