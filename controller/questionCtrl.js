@@ -21,7 +21,7 @@ QuestionCtrl.getQuestion = function(req, res) {
             include: [{
                 model: db.Answer,
                 required: false,
-                where: { questionId: Sequelize.col('question.id') }
+                where: { question_id: Sequelize.col('question.id') }
             }],
             order: ['answers.order']
         }).then(function(question){
@@ -44,20 +44,20 @@ QuestionCtrl.addQuestion = function(req, res) {
 
     if(text!=""){
 
-        async.parallel([
+        async.series([
             function(next){ 
 
                 db.Question.create({
                     id: q_id,
                     text: text
-                }).then(function(question){
+                }).then(function(result){
                     next();
                 });
 
             },
             function(next){ 
 
-                async.eachSeries(answers, function(answer, done) {
+                async.eachLimit(answers, 1, function(answer, done) {
 
                     var a_id = uuid.v4();
                     var text = answer;
@@ -81,13 +81,15 @@ QuestionCtrl.addQuestion = function(req, res) {
         ],function(err){
 
             var status = err || 'added';
-            res.send({'status':status});
+            if(res) res.send({'error':true});
+            else return true;
 
         });
 
         
     }else{
-        res.send({'error':true});
+        if(res) res.send({'error':true});
+        else return false;
     }
 
 };
@@ -116,7 +118,7 @@ QuestionCtrl.listQuestions = function(req, res) {
         include: [{
             model: db.Answer,
             required: false,
-            where: { questionId: Sequelize.col('question.id') }
+            where: { question_id: Sequelize.col('question.id') }
         }],
         order: ['created_at', 'answers.order']
     }).then(function(questions) {
@@ -131,5 +133,20 @@ QuestionCtrl.listQuestions = function(req, res) {
 
         res.send(results);
 
+    });
+};
+
+// Adds dummy questions if none
+QuestionCtrl.checkQuestion = function() {
+    db.Question.findOne().then(function(question) {
+        if(!question){
+
+            // Add each dummy record.
+            var dummy = require('../dummy.json');            
+            dummy.questions.forEach(function(question){
+                QuestionCtrl.addQuestion({body: question}, null);
+            });
+
+        }
     });
 };

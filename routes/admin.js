@@ -12,13 +12,25 @@ function requireAdmin(req, res, next) {
 	if( req.session.admin && req.session.loggedIn ){
 		next();
 	}else{
+		// Renders Admin Login page
+        res.render('admin/login', {
+            title:  'Login',
+            error: req.flash('error')
+        });
+	}
+};
+
+function requireAdminAjax(req, res, next) {
+	if( req.session.admin && req.session.loggedIn ){
+		next();
+	}else{
 		res.status(403);
 		res.send({success:false, error:'Not logged in'});
 	}
 };
 
 // Admin interface
-router.get( '/admin', AdminCtrl.adminDash);
+router.get( '/admin', requireAdmin, AdminCtrl.adminDash);
 
 // Admin log-in post
 router.post( '/admin', AdminCtrl.loginAdmin);
@@ -27,33 +39,33 @@ router.post( '/admin', AdminCtrl.loginAdmin);
 router.get( '/admin/logout', AdminCtrl.logoutAdmin);
 
 // Renders Edit Survey Questions page
-router.get( '/admin/questions', AdminCtrl.renderQuestions);
+router.get( '/admin/questions', requireAdmin, AdminCtrl.renderQuestions);
 
 // Renders Reports page
-router.get( '/admin/reports', AdminCtrl.renderReports);
+router.get( '/admin/reports', requireAdmin, AdminCtrl.renderReports);
 
 
 // Get a Question and it's Answers
-router.get('/question', requireAdmin, QuestionCtrl.getQuestion);
+router.get('/question', requireAdminAjax, QuestionCtrl.getQuestion);
 
 // Add a Question
-router.post('/question', requireAdmin, QuestionCtrl.addQuestion);
+router.post('/question', requireAdminAjax, QuestionCtrl.addQuestion);
 
 // Remove a Question and it's Answers
-router.delete('/question', requireAdmin, QuestionCtrl.removeQuestion);
+router.delete('/question', requireAdminAjax, QuestionCtrl.removeQuestion);
 
 
 // Get all Questions with Answers
-router.get('/questions', requireAdmin, QuestionCtrl.listQuestions);
+router.get('/questions', requireAdminAjax, QuestionCtrl.listQuestions);
 
 // Get an Answer
-router.get('/answer', requireAdmin, AnswerCtrl.getAnswer);
+router.get('/answer', requireAdminAjax, AnswerCtrl.getAnswer);
 
 // Add an Answer to a Question
-router.post('/answer', requireAdmin, AnswerCtrl.addAnswer);
+router.post('/answer', requireAdminAjax, AnswerCtrl.addAnswer);
 
 // Remove an Answer
-router.delete('/answer', requireAdmin, AnswerCtrl.removeAnswer);
+router.delete('/answer', requireAdminAjax, AnswerCtrl.removeAnswer);
 
 
 module.exports = router;

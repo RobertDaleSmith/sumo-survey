@@ -1,0 +1,41 @@
+{
+	"questions": [
+		{
+			"text": "Would you eat my taco?",
+			"answers": [
+				"Sure",
+				"Yes, with green sauce.",
+				"Yes, with red sauce.",
+				"No way, Jose!"
+			]
+		},
+		{
+			"text": "How many tacos does it take to make a taco salad?",
+			"answers": [
+				"Just one.",
+				"At least two.",
+				"None"
+			]
+		},
+		{
+			"text": "Which is the best taco at Torchy's?",
+			"answers": [
+				"The Democrat",
+				"The Republican",
+				"The Independent",
+				"Trailer Park",
+				"Other"
+			]
+		},
+		{
+			"text": "Best tacos in Austin, Texas?",
+			"answers": [
+				"Taco Joint",
+				"Tacodeli",
+				"Torchy's Tacos",
+				"Papalote Taco House",
+				"Other"
+			]
+		}
+	]
+}

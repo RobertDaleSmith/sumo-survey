@@ -2,6 +2,7 @@
 var models = module.exports = {};
 
 var AdminCtrl = require('../controller/AdminCtrl.js');
+var QuestionCtrl = require('../controller/QuestionCtrl.js');
 var config = require('../config.json');
 var Sequelize = require('sequelize');
 
@@ -29,6 +30,11 @@ var syncTables = function(ready){
 		// init admin if none
 		AdminCtrl.checkAdmin();
 
+		// init dummy questions if none
+		setTimeout(function(){
+			QuestionCtrl.checkQuestion();
+		},500);
+
 		// tables synced and DB ready for action
 		ready();
 	});
@@ -44,8 +50,8 @@ models.User = sequelize.import('./User.js');
 models.Vote = sequelize.import('./Vote.js');
 
 // model associations
-models.Question.hasMany(models.Answer, {onDelete: 'cascade'});
-models.Answer.belongsTo(models.Question, {onDelete: 'cascade'});
+models.Question.hasMany(models.Answer, {foreignKey: 'question_id'});
+models.Answer.belongsTo(models.Question, {foreignKey: 'question_id'});
 
 models.User.hasMany(models.Vote, {onDelete: 'cascade', hooks: true});
 models.Vote.belongsTo(models.User, {onDelete: 'cascade', hooks: true});

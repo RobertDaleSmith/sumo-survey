@@ -8,6 +8,11 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.UUID,
       allowNull: false
     },
+    question_id: {
+      field: 'question_id',
+      type: DataTypes.UUID,
+      allowNull: false
+    },
     text: {
       field: 'text',
       type: DataTypes.STRING, 

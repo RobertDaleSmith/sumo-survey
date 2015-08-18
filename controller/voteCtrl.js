@@ -42,7 +42,7 @@ VoteCtrl.getNextQuestion = function(req, res) {
 				include: [{
 					model: db.Answer,
 					required: false,
-					where: { questionId: Sequelize.col('question.id') },
+					where: { question_id: Sequelize.col('question.id') },
 					attributes: ['id', 'text', 'order']
 				}],
 				limit: 10,

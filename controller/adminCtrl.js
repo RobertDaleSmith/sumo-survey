@@ -52,28 +52,16 @@ var getStats = function(cb){
 // Admin interface
 AdminCtrl.adminDash = function(req, res) {
 
-    if(req.session.loggedIn){
-
-        // Query real stats for dashboard.
-        getStats(function(counts){
-            // Renders Admin Dashboard page.
-            res.render( 'admin/dash', {
-                title:  'Dashboard',
-                pageId: 'dash',
-                admin: req.session.admin,
-                counts: counts
-            });
+    // Query real stats for dashboard.
+    getStats(function(counts){
+        // Renders Admin Dashboard page.
+        res.render( 'admin/dash', {
+            title:  'Dashboard',
+            pageId: 'dash',
+            admin: req.session.admin,
+            counts: counts
         });
-
-    }else {
-        
-        // Renders Admin Login page
-        res.render('admin/login', {
-            title:  'Login',
-            error: req.flash('error')
-        });
-
-    }
+    });
 
 };
 
@@ -149,7 +137,7 @@ AdminCtrl.renderQuestions = function(req, res) {
         include: [{
             model: db.Answer,
             required: false,
-            where: { questionId: Sequelize.col('question.id') }
+            where: { question_id: Sequelize.col('question.id') }
         }],
         order: ['created_at', 'answers.order']
     }).then(function(questions) {
@@ -201,6 +189,7 @@ AdminCtrl.checkAdmin = function() {
         attributes: ['username', 'password']
     }).then(function(admin) {
         if(!admin){
+            // Default admin not found.
             addAdmin(config.admin.username, config.admin.password);
         }
     });
