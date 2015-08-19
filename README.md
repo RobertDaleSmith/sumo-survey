@@ -24,14 +24,14 @@
 - Default username is 'sumo', password is 'tacos'.
 
 
-###Known Bugs:
+##Known Bugs:
 
 - Association between Question and Answer randomly not working.
 
 - Added check to fetch detached answers on public facing page, until resolved.
 
 
-###In response to:
+##In response to:
 
 Create a web app written in Node.JS using an Express based framework, SequelizeJS, and MySQL.
 
