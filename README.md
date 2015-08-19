@@ -1,5 +1,13 @@
 # sumo-survey
 
+Setup Instructions:
+-----
+
+1.) Spin up your MySQL server. 
+2.) Create a new database schema named: 'sumosurvey'.
+3.) Add MySQL database credentials to the config.json file.
+
+
 In response to:
 -----
 
