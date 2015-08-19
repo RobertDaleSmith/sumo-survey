@@ -17,7 +17,7 @@
 
 ##Admin Interface
 
-- Login to admin interface at: http://localhost:3000/admin
+- Login to admin interface at: http://localhost:5000/admin
 
 - Default admin username and password can be set in config.json before first launch.
 
