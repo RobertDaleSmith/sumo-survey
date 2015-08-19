@@ -102,7 +102,7 @@ AdminCtrl.loginAdmin = function(req, res) {
                 // Password invalid.
                 req.flash('error', 'Invalid Username or Password.');
                 req.session.save(function (err) {
-                    res.redirect('/admin');
+                    res.redirect(req.url);
                 });
 
             }
