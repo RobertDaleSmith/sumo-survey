@@ -13,6 +13,7 @@
 
 5. npm app
 
+6. http://localhost:5000/
 
 
 ##Admin Interface
