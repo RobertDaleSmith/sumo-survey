@@ -65,7 +65,7 @@ VoteCtrl.getNextQuestion = function(req, res) {
 		function(next){ 
 
 			// Temp hack to patch a bug
-			if(question.answers){
+			if(question){
 				if(question.answers.length <= 0){
 
 					db.Answer.findAll({
