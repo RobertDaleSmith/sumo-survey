@@ -2,7 +2,6 @@
 
 
 ##Setup Instructions:
------
 
 1. Spin up your MySQL server.
 
@@ -17,7 +16,6 @@
 
 
 ##Admin Interface
------
 
 - Login to admin interface at: http://localhost:3000/admin
 
@@ -27,7 +25,6 @@
 
 
 ##Bugs:
------
 
 - Association between Question and Answer randomly now working.
 
@@ -35,7 +32,6 @@
 
 
 ##In response to:
------
 
 Create a web app written in Node.JS using an Express based framework, SequelizeJS, and MySQL.
 
