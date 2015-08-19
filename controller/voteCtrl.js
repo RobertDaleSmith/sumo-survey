@@ -11,6 +11,7 @@ var uuid = require('node-uuid');
 VoteCtrl.getNextQuestion = function(req, res) {
 	var u_id = req.session.token;
 	var answered = [];
+	var question = {};
 
 	async.series([
 		// Gets user's answered question ids.
@@ -55,16 +56,40 @@ VoteCtrl.getNextQuestion = function(req, res) {
 					var idx = Math.round(Math.random()*max);
 					result=questions[idx].dataValues;
 				}
-				next(result);
+				question = result;
+				next();
 
 			});
 
-		}
-	],function(result){
+		},
+		function(next){ 
+
+			// Temp hack to patch a bug
+			if(question.answers){
+				if(question.answers.length <= 0){
+
+					db.Answer.findAll({
+						where: {question_id: question.id},
+						attributes: ['id','text','order'],
+						order: ['order']
+					}).then(function(answers) {
+						
+						question.answers = answers;
+
+						next();
+						
+					});
+
+				}else next(); 
+
+			}else next();
+			
+		},
+	],function(){
 		
 		//Render single qurstion survey form.
 		res.render( 'index/survey', {
-            question: result
+            question: question
         });
 
 	});

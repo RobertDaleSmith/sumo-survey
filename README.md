@@ -1,14 +1,40 @@
 # sumo-survey
 
-Setup Instructions:
+
+##Setup Instructions:
 -----
 
-1.) Spin up your MySQL server. 
-2.) Create a new database schema named: 'sumosurvey'.
-3.) Add MySQL database credentials to the config.json file.
+1. Spin up your MySQL server.
+
+2. Create a new database schema named: 'sumosurvey'.
+
+3. Add MySQL database credentials to the config.json file. (host, username, password)
+
+4. npm install
+
+5. npm app
 
 
-In response to:
+
+##Admin Interface
+-----
+
+- Login to admin interface at: http://localhost:3000/admin
+
+- Default admin username and password can be set in config.json before first launch.
+
+- Default username is 'sumo', password is 'tacos'.
+
+
+##Bugs:
+-----
+
+- Association between Question and Answer randomly now working.
+
+- Added check to fetch detached answers on public facing page, until resolved.
+
+
+##In response to:
 -----
 
 Create a web app written in Node.JS using an Express based framework, SequelizeJS, and MySQL.
