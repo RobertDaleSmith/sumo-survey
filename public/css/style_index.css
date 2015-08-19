@@ -482,6 +482,7 @@ label {
 
 #cta-modal input[type="radio"] {
     float: left;
+    cursor: pointer;
 }
 
 #cta-modal button {
